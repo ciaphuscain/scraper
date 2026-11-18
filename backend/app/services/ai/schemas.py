@@ -27,8 +27,8 @@ def _norm_enum(v: Any, allowed: list[str], default: str) -> str:
 
 
 class ChunkIdea(BaseModel):
-    title: str = Field(min_length=2, max_length=300)
-    explanation: str = Field(min_length=2)
+    title: str = Field(min_length=1, max_length=300)
+    explanation: str = Field(min_length=1)
     idea_type: str = "main_idea"
     topic: str = ""
     keywords: list[str] = Field(default_factory=list)

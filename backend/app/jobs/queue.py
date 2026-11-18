@@ -126,7 +126,8 @@ def enqueue(
 
 def claim(session: Session, lane: str, worker_id: str) -> Job | None:
     """Atomically claim the highest-priority runnable job in ``lane``."""
-    now = utcnow()
+    # Same text format SQLAlchemy uses for DateTime columns on SQLite, so string comparison is valid.
+    now = utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")
     row = session.execute(
         text(
             """

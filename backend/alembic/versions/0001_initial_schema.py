@@ -2,12 +2,11 @@
 
 Revision ID: 0001
 Revises: 
-Create Date: 2026-11-08 04:22:22.949809
+Create Date: 2026-11-18 04:03:31.319181
 """
 from typing import Sequence, Union
 
 from alembic import op
-
 import sqlalchemy as sa
 
 
@@ -97,7 +96,7 @@ def upgrade() -> None:
     sa.Column('error_message', sa.Text(), nullable=True),
     sa.Column('worker_id', sa.String(length=64), nullable=True),
     sa.Column('heartbeat_at', sa.DateTime(), nullable=True),
-    sa.Column('cancel_requested', sa.Boolean(), server_default=sa.text('0'), nullable=False),
+    sa.Column('requested_action', sa.String(length=16), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('started_at', sa.DateTime(), nullable=True),
     sa.Column('finished_at', sa.DateTime(), nullable=True),

@@ -1,0 +1,35 @@
+WEBVTT
+Kind: captions
+Language: en
+
+00:00:00.000 --> 00:00:02.000 align:start position:0%
+ 
+so<00:00:00.400><c> today</c><00:00:00.800><c> we</c><00:00:01.200><c> learn</c>
+
+00:00:02.000 --> 00:00:02.010 align:start position:0%
+so today we learn
+ 
+
+00:00:02.010 --> 00:00:04.000 align:start position:0%
+so today we learn
+about<00:00:02.500><c> neural</c><00:00:03.000><c> networks</c>
+
+00:00:04.000 --> 00:00:04.010 align:start position:0%
+about neural networks
+ 
+
+00:00:04.010 --> 00:00:06.000 align:start position:0%
+about neural networks
+they<00:00:04.500><c> learn</c><00:00:05.000><c> from</c><00:00:05.500><c> data</c>
+
+00:00:06.000 --> 00:00:06.010 align:start position:0%
+they learn from data
+ 
+
+00:00:06.010 --> 00:00:08.000 align:start position:0%
+they learn from data
+using<00:00:06.500><c> gradient</c><00:00:07.000><c> descent</c>
+
+00:00:08.000 --> 00:00:08.010 align:start position:0%
+using gradient descent
+ 
