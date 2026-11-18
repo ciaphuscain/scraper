@@ -30,10 +30,11 @@ class InstanceLock:
         except OSError as exc:
             fh.close()
             raise AlreadyRunning(f"another instance holds {self.path}") from exc
-        fh.seek(0)
-        fh.truncate()
-        fh.write(str(os.getpid()))
-        fh.flush()
+        if os.name != "nt":  # on Windows the locked byte range must not be truncated
+            fh.seek(0)
+            fh.truncate()
+            fh.write(str(os.getpid()))
+            fh.flush()
         self._fh = fh
 
     def release(self) -> None:

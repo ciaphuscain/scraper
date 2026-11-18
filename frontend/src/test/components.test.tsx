@@ -173,7 +173,7 @@ describe("error handling", () => {
     mockApi([{ path: "/api/x", status: 400, body: { detail: "Not a channel URL" } }]);
     await expect(api.get("/api/x")).rejects.toThrow("Not a channel URL");
     vi.stubGlobal("fetch", vi.fn(async () => { throw new TypeError("network"); }));
-    const err = await api.get("/api/y").catch((e) => e);
+    const err = (await api.get("/api/y").catch((e: unknown) => e)) as ApiError;
     expect(err).toBeInstanceOf(ApiError);
     expect(err.message).toMatch(/Cannot reach the backend/);
   });
