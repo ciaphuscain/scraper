@@ -136,3 +136,50 @@ def annotate(idea_id: int, body: AnnotationUpdate, db: Session = Depends(get_db)
     ann.segment_keys_snapshot = list(i.segment_keys or [])
     db.commit()
     return annotation_out(ann)
+
+
+@router.post("/export")
+def export_ideas(body: dict, db: Session = Depends(get_db)):
+    """Export a hand-picked set of ideas (JSON, CSV or Markdown), with attribution."""
+    import json
+
+    from fastapi.responses import Response
+
+    from app.services.exports.archive import ideas_csv
+    from app.services.exports.records import idea_dict
+    from app.utils.time import fmt_ts
+
+    ids = [int(x) for x in (body.get("ids") or [])][:10000]
+    fmt = body.get("format", "json")
+    if not ids:
+        from app.api.deps import bad_request
+
+        raise bad_request("no ideas selected")
+    ideas = db.execute(select(Idea).where(Idea.id.in_(ids)).order_by(Idea.video_id, Idea.ordinal)).scalars().all()
+    vids = {i.video_id for i in ideas}
+    videos = {v.id: v for v in db.execute(select(Video).where(Video.id.in_(vids))).scalars()} if vids else {}
+    names = dict(db.execute(select(Channel.id, Channel.name)).all())
+    anns = {a.idea_id: a for a in db.execute(select(IdeaAnnotation).where(IdeaAnnotation.idea_id.in_(ids))).scalars()}
+    rows = []
+    for i in ideas:
+        d = idea_dict(i, videos.get(i.video_id), names.get(i.channel_id))
+        a = anns.get(i.id)
+        d["note"], d["tags"], d["bookmarked"] = (a.note, a.tags, a.bookmarked) if a else (None, [], False)
+        rows.append(d)
+    if fmt == "csv":
+        content, mt, ext = ideas_csv(rows), "text/csv", "csv"
+    elif fmt == "md":
+        lines = ["# Selected ideas", ""]
+        for d in rows:
+            ts = fmt_ts(d["start_time"]) if d["start_time"] is not None else "?"
+            lines += [f"## {d['title']}", f"*{d['idea_type']} · {d['topic']} · {d['channel_name']} — "
+                      f"[{d['video_title']} @ {ts}]({d['timestamp_url']})*", "", d["explanation"], ""]
+            lines += [f"> {e.get('text', '')}" for e in d["excerpts"][:2]]
+            if d["note"]:
+                lines += ["", f"**Note:** {d['note']}"]
+            lines.append("")
+        content, mt, ext = "\n".join(lines), "text/markdown", "md"
+    else:
+        content, mt, ext = json.dumps({"count": len(rows), "ideas": rows}, ensure_ascii=False, indent=2, default=str), "application/json", "json"
+    return Response(content, media_type=f"{mt}; charset=utf-8",
+                    headers={"Content-Disposition": f'attachment; filename="ideas_export.{ext}"'})

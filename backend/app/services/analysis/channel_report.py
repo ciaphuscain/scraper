@@ -16,6 +16,7 @@ from app.services.ai import prompts as P
 from app.services.ai.llm import StructuredLLM
 from app.services.ai.schemas import ChannelNarrative
 from app.services.analysis.common import candidate_pairs, idea_ref, norm_topic
+from app.utils.text import STOPWORDS
 from app.utils.time import fmt_ts, utcnow
 
 log = logging.getLogger(__name__)
@@ -49,7 +50,7 @@ def build_channel_data(session: Session, channel: Channel) -> dict[str, Any]:
     kw_videos: dict[str, set[str]] = defaultdict(set)
     kw_ideas: dict[str, list[Idea]] = defaultdict(list)
     for i in ideas:
-        for kw in {k.lower() for k in (i.keywords or [])}:
+        for kw in {k.lower() for k in (i.keywords or [])} - STOPWORDS:
             kw_videos[kw].add(i.video_id)
             kw_ideas[kw].append(i)
     frequent = [{"concept": kw, "video_count": len(vs), "sources": [idea_ref(x, vt(x)) for x in kw_ideas[kw][:5]]}
@@ -61,7 +62,7 @@ def build_channel_data(session: Session, channel: Channel) -> dict[str, Any]:
 
     unique = []
     for i in ideas:
-        kws = {k.lower() for k in (i.keywords or [])}
+        kws = {k.lower() for k in (i.keywords or [])} - STOPWORDS
         if kws and all(len(kw_videos[k]) == 1 for k in kws):
             unique.append(i)
     unique.sort(key=lambda i: -(i.confidence or 0))
